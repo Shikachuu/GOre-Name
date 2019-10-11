@@ -11,16 +11,15 @@ func main() {
 	files, err := ioutil.ReadDir(workFolder)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(workFolder)
 	}
-	for _, file := range files {
+	for i, file := range files {
 		trueFilename := strings.TrimSuffix(file.Name(), "\r")
 		newName := slugify(trueFilename)
-		fmt.Println(trueFilename)
-		fmt.Println(newName)
 		os.Rename(trueFilename, workFolder+"/"+newName)
+		fmt.Println("Renamed files:",i+1)
 	}
-	fmt.Println("Done")
+	fmt.Println("Press Enter to exit")
+	fmt.Scanln()
 }
 func slugify(stringToSlugify string) string{
 	changeSpacesToDashes := strings.NewReplacer(" ", "_")
