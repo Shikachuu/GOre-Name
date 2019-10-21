@@ -13,9 +13,8 @@ func main() {
 		fmt.Println(err)
 	}
 	for i, file := range files {
-		trueFilename := strings.TrimSuffix(file.Name(), "\r")
-		newName := slugify(trueFilename)
-		os.Rename(trueFilename, workFolder+"/"+newName)
+		newName := slugify(file.Name())
+		go os.Rename(file.Name(), workFolder+"/"+newName)
 		fmt.Println("Renamed files:",i+1)
 	}
 	fmt.Println("Press Enter to exit")
