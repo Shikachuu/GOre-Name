@@ -18,7 +18,7 @@ func LowercaseSlugifyTest( t *testing.T)  {
 
 }
 
-func AsciiSlugifyTest( t *testing.T)  {
+func ASCIISlugifyTest( t *testing.T)  {
 	asciiSlug := slugify("ääaa");
 	if asciiSlug != "aeaeaa" {
 		t.Errorf("slugify on ascii case string failed, expected aeaeaa, got %v",asciiSlug)

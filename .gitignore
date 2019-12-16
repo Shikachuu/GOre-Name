@@ -13,3 +13,4 @@ vendor/
 ### Go Patch ###
 /vendor/
 /Godeps/
+*.csv
