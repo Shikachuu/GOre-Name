@@ -36,9 +36,9 @@ func slugify(stringToSlugify string) string {
 func createCsvFromFileNames(fileNames [][]string) {
 	file,err := os.Create("rename-result.csv")
 	check("Cannot create file, maybe permission problems?",err)
-	defer file.Close()
 	writer := csv.NewWriter(file)
 	check("Cannot write to file, maybe permission problems?",writer.WriteAll(fileNames))
+	file.Close()
 }
 
 func rename(files []os.FileInfo,workFolder string) (csvExport [][]string) {
