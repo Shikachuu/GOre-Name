@@ -2,7 +2,7 @@ name: Go
 on: [push]
 jobs:
   test:
-    name: Run the unit test and build
+    name: Run the unit tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -14,17 +14,45 @@ jobs:
           go-version: 1.13
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@master
 
       - name: go test
         run:  |
           go get github.com/rainycape/unidecode
           go test .
 
-      - name: Build
-        run: go build -v .
+  release-linux-amd64:
+    name: release linux/amd64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: compile and release
+      uses: ngs/go-release.action@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOARCH: amd64
+        GOOS: linux
 
-      - name: github-action-publish-binaries
-        uses: skx/github-action-publish-binaries@release-1.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release-darwin-amd64:
+    name: release darwin/amd64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: compile and release
+      uses: ngs/go-release.action@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOARCH: amd64
+        GOOS: darwin
+
+  release-windows-amd64:
+    name: release windows/amd64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: compile and release
+      uses: ngs/go-release.action@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOARCH: amd64
+        GOOS: windows
