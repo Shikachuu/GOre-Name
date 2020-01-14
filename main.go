@@ -7,15 +7,16 @@ import (
 	"os"
 	"strings"
 	"encoding/csv"
+	"flag"
 
 	"github.com/rainycape/unidecode"
 )
 
 func main() {
-	workFolder := "."
-	files, err := ioutil.ReadDir(workFolder)
+	pathVal := getPath()
+	files, err := ioutil.ReadDir(pathVal)
 	check("Cannot read files from folder, maybe permission problems?",err)
-	fileNames := rename(files,".")
+	fileNames := rename(files,pathVal)
 	createCsvFromFileNames(fileNames)
 	fmt.Println("Press Enter to exit")
 	fmt.Scanln()
@@ -42,21 +43,21 @@ func createCsvFromFileNames(fileNames [][]string) {
 }
 
 func rename(files []os.FileInfo,workFolder string) (csvExport [][]string) {
-	for i, file := range files {
+	for _, file := range files {
 		newName := slugify(file.Name())
 		var dummyToCsv []string
 		dummyToCsv = append(dummyToCsv, newName)
 		csvExport = append(csvExport,dummyToCsv)
-		// if file.IsDir() {
-		// 	subFiles, err := ioutil.ReadDir("./"+file.Name())
-		// 	check("Cannot read files from sub-folder, maybe permission problems?",err)
-		// 	subFolderChildren := rename(subFiles,file.Name())
-		// 	for _, child := range subFolderChildren {
-		// 		csvExport = append(csvExport,child)
-		// 	}
-		// }
-		go os.Rename(file.Name(), workFolder+"/"+newName)
-		log.Print("Renamed files:", i+1)
+		log.Print(workFolder+file.Name())
+		go os.Rename(workFolder+file.Name(), workFolder+"/"+newName)
+		//log.Print("Renamed files:", i+1)
 	}
 	return
+}
+
+func getPath() string {
+	workFolder := flag.String("path", "./", "define workdir")
+	flag.Parse()
+	returnVal := *workFolder
+	return returnVal
 }
