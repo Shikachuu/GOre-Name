@@ -1,41 +1,33 @@
 package main
-import "testing"
 
-func EmptySlugifyTest(t *testing.T)  {
-	emptySlug := slugify("")
-	if emptySlug != "" {
-		t.Errorf("slugify on empty string failed, expected nothing, got: %v",emptySlug)
-	}else{
-		t.Logf("slugify on empty string success")
+import (
+	"testing"
+)
+
+func Test_slugify(t *testing.T) {
+	channel := make(chan string)
+	type args struct {
+		stringToSlugify string
+		c chan string
 	}
-}
-
-func LowercaseSlugifyTest(t *testing.T)  {
-	LowercaseSlug := slugify("TEST");
-	if LowercaseSlug != "test" {
-		t.Errorf("slugify on lowercase case string failed, expected test, got %v",LowercaseSlug)
+	tests := []struct {
+		name string
+		args args
+		expected string
+	}{
+		{"empty slug",args{stringToSlugify: "",c: channel},""},
+		{"lowercase",args{stringToSlugify: "TEST",c: channel},"test"},
+		{"ascii",args{stringToSlugify: "ääaa",c: channel},"aeaeaa"},
+		{"space",args{stringToSlugify: "    ",c: channel},"____"},
+		{"dots",args{stringToSlugify: "Áäää  .asd.T",c: channel},"aaeaeae__.asd.t"},
 	}
-
-}
-
-func ASCIISlugifyTest(t *testing.T)  {
-	asciiSlug := slugify("ääaa");
-	if asciiSlug != "aeaeaa" {
-		t.Errorf("slugify on ascii case string failed, expected aeaeaa, got %v",asciiSlug)
-	}
-
-}
-
-func SpaceSlugifyTest(t *testing.T)  {
-	spaceSlug := slugify("    ");
-	if spaceSlug != "____" {
-		t.Errorf("slugify on ascii case string failed, expected ____, got %v",spaceSlug)
-	}
-}
-
-func FullSlugifyTest(t *testing.T)  {
-	fullSlug := slugify("ÁL MÁ");
-	if fullSlug != "al_ma" {
-		t.Errorf("slugify on full case string failed, expected al_ma, got %v",fullSlug)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			slugify(tt.args.stringToSlugify, tt.args.c)
+		})
+		result := <- tt.args.c
+		if tt.expected != result {
+			t.Errorf("slugify error on case %s, got %v, expected %v",tt.name,result,tt.expected)
+		}
 	}
 }

@@ -13,11 +13,11 @@ import (
 )
 
 func main() {
-	pathVal := getPath()
-	files, err := ioutil.ReadDir(pathVal)
-	check("Cannot read files from folder, maybe permission problems?",err)
-	fileNames := rename(files,pathVal)
-	createCsvFromFileNames(fileNames)
+	path := getPath()
+	files, dirReadErr := ioutil.ReadDir(path)
+	check("Cannot read files from folder, maybe permission problems?",dirReadErr)
+	fileNames := renameFolderContent(files,path)
+	go createCsvFromFileNames(fileNames)
 	fmt.Println("Press Enter to exit")
 	fmt.Scanln()
 }
@@ -28,10 +28,10 @@ func check(message string,err error) {
 	}
 }
 
-func slugify(stringToSlugify string) string {
+func slugify(stringToSlugify string, c chan string) {
 	changeSpacesToDashes := strings.NewReplacer(" ", "_")
 	finalString := changeSpacesToDashes.Replace(strings.ToLower(stringToSlugify))
-	return unidecode.Unidecode(finalString)
+	c <- unidecode.Unidecode(finalString)
 }
 
 func createCsvFromFileNames(fileNames [][]string) {
@@ -42,15 +42,15 @@ func createCsvFromFileNames(fileNames [][]string) {
 	file.Close()
 }
 
-func rename(files []os.FileInfo,workFolder string) (csvExport [][]string) {
+func renameFolderContent(files []os.FileInfo,workFolder string) (csvExport [][]string) {
+	slugChan := make(chan string)
 	for _, file := range files {
-		newName := slugify(file.Name())
-		var dummyToCsv []string
-		dummyToCsv = append(dummyToCsv, newName)
-		csvExport = append(csvExport,dummyToCsv)
+		go slugify(file.Name(),slugChan)
+		newName := <- slugChan
+		csvRow := []string{newName}
+		csvExport = append(csvExport,csvRow)
 		log.Print(workFolder+file.Name())
 		go os.Rename(workFolder+file.Name(), workFolder+"/"+newName)
-		//log.Print("Renamed files:", i+1)
 	}
 	return
 }
@@ -58,6 +58,6 @@ func rename(files []os.FileInfo,workFolder string) (csvExport [][]string) {
 func getPath() string {
 	workFolder := flag.String("path", "./", "define workdir")
 	flag.Parse()
-	returnVal := *workFolder
-	return returnVal
+	workFolderDeref := *workFolder
+	return workFolderDeref
 }
